@@ -5,7 +5,7 @@ export default async function StatusPage(props: {
   searchParams: Promise<{ table?: string }>;
 }) {
   const { table } = await props.searchParams;
-
+  
   const tableNum = table ? parseInt(table, 10) : NaN;
   if (isNaN(tableNum) || tableNum < 1 || tableNum > 20) {
     return (
@@ -19,9 +19,10 @@ export default async function StatusPage(props: {
       </div>
     );
   }
-
+  
   const tableData = await getTable(table);
   const tableName = tableData ? tableData.name : String(tableNum);
-
-  return <OrderStatusView tableId={tableNum} tableName={tableName} />;
+  
+  return <OrderStatusView  tableId={tableNum} tableName={tableName} />;
 }
+export const dynamic = "force-dynamic";
