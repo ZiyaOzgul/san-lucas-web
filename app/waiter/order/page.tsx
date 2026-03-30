@@ -67,7 +67,7 @@ async function WaiterOrderContent({
   return (
     <CartProvider tableId={tableId} orderType="active">
       <div className="min-h-screen pb-28 max-w-lg mx-auto">
-        <MenuHeader tableLabel={tableLabel} rightSlot={RightSlot} />
+        <MenuHeader tableLabel={tableLabel} rightSlot={RightSlot} tableId={tableId}/>
 
         <div className="px-4 pt-4 pb-1">
           <p className="text-xs font-semibold text-brand uppercase tracking-widest">
