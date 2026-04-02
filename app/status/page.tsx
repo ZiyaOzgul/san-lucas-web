@@ -25,4 +25,3 @@ export default async function StatusPage(props: {
   
   return <OrderStatusView  tableId={tableNum} tableName={tableName} />;
 }
-export const dynamic = "force-dynamic";
