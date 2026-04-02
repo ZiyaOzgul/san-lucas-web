@@ -1,11 +1,24 @@
+import { Suspense } from "react";
 import { getTable } from "@/lib/supabase/queries";
 import { OrderStatusView } from "@/app/components/status/OrderStatusView";
 
-export default async function StatusPage(props: {
+export default function StatusPage(props: {
   searchParams: Promise<{ table?: string }>;
 }) {
-  const { table } = await props.searchParams;
-  
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-400 text-sm">Yükleniyor...</div>}>
+      <StatusContent searchParamsPromise={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function StatusContent({
+  searchParamsPromise,
+}: {
+  searchParamsPromise: Promise<{ table?: string }>;
+}) {
+  const { table } = await searchParamsPromise;
+
   const tableNum = table ? parseInt(table, 10) : NaN;
   if (isNaN(tableNum) || tableNum < 1 || tableNum > 20) {
     return (
@@ -19,9 +32,9 @@ export default async function StatusPage(props: {
       </div>
     );
   }
-  
+
   const tableData = await getTable(table);
   const tableName = tableData ? tableData.name : String(tableNum);
-  
-  return <OrderStatusView  tableId={tableNum} tableName={tableName} />;
+
+  return <OrderStatusView tableId={tableNum} tableName={tableName} />;
 }
