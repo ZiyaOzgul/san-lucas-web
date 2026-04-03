@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "motion/react";
 
 type Props = {
   orderId: number;
@@ -11,8 +12,17 @@ type Props = {
 
 export function OrderConfirmation({ orderId, tableId, tableLabel, onNewOrder }: Props) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-6">
-      <div className="w-20 h-20 rounded-full bg-brand flex items-center justify-center">
+    <motion.div
+      className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <motion.div
+        className="w-20 h-20 rounded-full bg-brand flex items-center justify-center"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
+      >
         <svg
           width="36"
           height="36"
@@ -25,19 +35,28 @@ export function OrderConfirmation({ orderId, tableId, tableLabel, onNewOrder }: 
         >
           <polyline points="20 6 9 17 4 12" />
         </svg>
-      </div>
+      </motion.div>
 
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
         <h2 className="text-2xl font-bold text-text">Sipariş Alındı!</h2>
         <p className="text-muted mt-2 text-sm">
           {tableLabel} için #{orderId} numaralı siparişiniz alındı.
           <br />
           En kısa sürede getiriyoruz.
         </p>
-      </div>
+      </motion.div>
 
       {/* Status hint */}
-      <div className="w-full max-w-xs bg-amber-50 border border-amber-200 rounded-2xl px-4 py-4 flex flex-col items-center gap-3">
+      <motion.div
+        className="w-full max-w-xs bg-amber-50 border border-amber-200 rounded-2xl px-4 py-4 flex flex-col items-center gap-3"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
         <p className="text-sm text-amber-800 font-medium leading-snug">
           Siparişinin durumunu takip etmek için sağ üstteki
           {" "}
@@ -53,14 +72,18 @@ export function OrderConfirmation({ orderId, tableId, tableLabel, onNewOrder }: 
         >
           Siparişimi Takip Et
         </Link>
-      </div>
+      </motion.div>
 
-      <button
+      <motion.button
         onClick={onNewOrder}
         className="text-muted text-sm underline underline-offset-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.55 }}
+        whileTap={{ scale: 0.97 }}
       >
         Tekrar Sipariş Ver
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }

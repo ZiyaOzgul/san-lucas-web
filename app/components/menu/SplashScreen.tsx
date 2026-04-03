@@ -2,39 +2,36 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "motion/react";
 
 export function SplashScreen() {
-  const [visible, setVisible] = useState(true);
-  const [fading, setFading] = useState(false);
+  const [shown, setShown] = useState(true);
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setFading(true), 1400);
-    const hideTimer = setTimeout(() => setVisible(false), 1900);
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(hideTimer);
-    };
+    const t = setTimeout(() => setShown(false), 1400);
+    return () => clearTimeout(t);
   }, []);
 
-  if (!visible) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-page"
-      style={{
-        transition: "opacity 0.5s ease",
-        opacity: fading ? 0 : 1,
-        pointerEvents: "none",
-      }}
-    >
-      <Image
-        src="/san-lucas-logo.png"
-        alt="San Lucas"
-        width={180}
-        height={180}
-        priority
-        className="object-contain"
-      />
-    </div>
+    <AnimatePresence>
+      {shown && (
+        <motion.div
+          key="splash"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-page pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.3 } }}
+          exit={{ opacity: 0, transition: { duration: 0.5 } }}
+        >
+          <Image
+            src="/san-lucas-logo.png"
+            alt="San Lucas"
+            width={180}
+            height={180}
+            priority
+            className="object-contain"
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

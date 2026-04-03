@@ -53,7 +53,8 @@ async function MenuContent({
   return (
     <CartProvider tableId={tableId} orderType="pending">
       <SplashScreen />
-      <div className="min-h-screen pb-28 max-w-lg mx-auto">
+      <div className="min-h-screen bg-[url('/bgImage.jpeg')] bg-cover bg-center bg-fixed">
+      <div className="min-h-screen pb-28 max-w-lg mx-auto bg-black/50">
         <MenuHeader tableLabel={tableLabel} tableId={tableId} />
         <MenuHero
           title="San Lucas Cafe"
@@ -63,6 +64,7 @@ async function MenuContent({
           <ProductCatalog products={products} categories={categories} />
         </div>
         <CartBar tableLabel={tableLabel} />
+      </div>
       </div>
     </CartProvider>
   );

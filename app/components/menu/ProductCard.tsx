@@ -1,8 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { motion } from "motion/react";
 import type { Product } from "@/lib/types";
 import { useCart } from "./CartProvider";
+
+export const productCardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+};
 
 type Props = {
   product: Product;
@@ -16,9 +22,11 @@ export function ProductCard({ product, categoryColor, onSelect }: Props) {
   const qty = cartItem?.quantity ?? 0;
 
   return (
-    <button
+    <motion.button
       onClick={() => onSelect(product)}
-      className="bg-card rounded-card flex gap-3 p-3 shadow-sm text-left w-full active:scale-[0.98] transition-transform relative"
+      className="bg-card rounded-card flex gap-3 p-3 shadow-sm text-left w-full relative"
+      variants={productCardVariants}
+      whileTap={{ scale: 0.97 }}
     >
       {/* Image */}
       <div
@@ -69,6 +77,6 @@ export function ProductCard({ product, categoryColor, onSelect }: Props) {
           </p>
         )}
       </div>
-    </button>
+    </motion.button>
   );
 }

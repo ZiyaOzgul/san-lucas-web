@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { motion } from "motion/react";
 import type { Product } from "@/lib/types";
 import { useCart } from "./CartProvider";
 
 type Props = {
-  product: Product | null;
+  product: Product;
   categoryColor: string | null;
   onClose: () => void;
 };
@@ -15,46 +16,36 @@ export function ProductModal({ product, categoryColor, onClose }: Props) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
-  const [visible, setVisible] = useState(false);
 
-  // Animate in when product is set
   useEffect(() => {
-    if (product) {
-      setQuantity(1);
-      setNotes("");
-      // Small delay to allow the DOM to mount before triggering transition
-      requestAnimationFrame(() => setVisible(true));
-    } else {
-      setVisible(false);
-    }
-  }, [product]);
-
-  function handleClose() {
-    setVisible(false);
-    setTimeout(onClose, 250);
-  }
+    setQuantity(1);
+    setNotes("");
+  }, [product.id]);
 
   function handleAdd() {
-    if (!product) return;
     addItem(product, quantity, notes.trim() || undefined);
-    handleClose();
+    onClose();
   }
-
-  if (!product) return null;
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40 bg-black/50 transition-opacity duration-300"
-        style={{ opacity: visible ? 1 : 0 }}
-        onClick={handleClose}
+      <motion.div
+        className="fixed inset-0 z-40 bg-black/50"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={onClose}
       />
 
       {/* Bottom sheet */}
-      <div
-        className="fixed inset-x-0 bottom-0 z-50 bg-card rounded-t-3xl max-h-[90vh] overflow-y-auto transition-transform duration-300"
-        style={{ transform: visible ? "translateY(0)" : "translateY(100%)" }}
+      <motion.div
+        className="fixed inset-x-0 bottom-0 z-50 bg-card rounded-t-3xl max-h-[90vh] overflow-y-auto"
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
       >
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
@@ -62,15 +53,16 @@ export function ProductModal({ product, categoryColor, onClose }: Props) {
         </div>
 
         {/* Close button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-text active:scale-95 transition-transform"
+        <motion.button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-text"
+          whileTap={{ scale: 0.9 }}
           aria-label="Kapat"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6 6 18M6 6l12 12" />
           </svg>
-        </button>
+        </motion.button>
 
         {/* Product image */}
         <div
@@ -128,35 +120,38 @@ export function ProductModal({ product, categoryColor, onClose }: Props) {
           <div className="flex items-center gap-3">
             {/* Quantity selector */}
             <div className="flex items-center gap-3 bg-white border border-border rounded-pill px-3 py-2">
-              <button
+              <motion.button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="w-7 h-7 rounded-full border-2 border-brand text-brand flex items-center justify-center text-lg font-light active:scale-95 transition-transform"
+                className="w-7 h-7 rounded-full border-2 border-brand text-brand flex items-center justify-center text-lg font-light"
+                whileTap={{ scale: 0.9 }}
                 aria-label="Azalt"
               >
                 −
-              </button>
+              </motion.button>
               <span className="w-6 text-center font-bold text-base text-text">
                 {quantity}
               </span>
-              <button
+              <motion.button
                 onClick={() => setQuantity((q) => q + 1)}
-                className="w-7 h-7 rounded-full bg-brand text-white flex items-center justify-center text-lg font-light active:scale-95 transition-transform"
+                className="w-7 h-7 rounded-full bg-brand text-white flex items-center justify-center text-lg font-light"
+                whileTap={{ scale: 0.9 }}
                 aria-label="Artır"
               >
                 +
-              </button>
+              </motion.button>
             </div>
 
             {/* Add to cart */}
-            <button
+            <motion.button
               onClick={handleAdd}
-              className="flex-1 bg-brand text-white font-semibold rounded-pill py-3 text-sm active:scale-95 transition-transform shadow-sm"
+              className="flex-1 bg-brand text-white font-semibold rounded-pill py-3 text-sm shadow-sm"
+              whileTap={{ scale: 0.97 }}
             >
               Sepete Ekle · ₺{(product.price * quantity).toLocaleString("tr-TR")}
-            </button>
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }
