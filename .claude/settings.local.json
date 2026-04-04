@@ -3,7 +3,8 @@
     "allow": [
       "Bash(cd:*)",
       "Bash(grep:*)",
-      "Bash(npm info:*)"
+      "Bash(npm info:*)",
+      "Bash(find:*)"
     ]
   }
 }

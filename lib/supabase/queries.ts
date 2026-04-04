@@ -22,6 +22,7 @@ export async function getActiveProducts(): Promise<Product[]> {
     .eq("is_active", true)
     .order("name");
 
+  console.log('[getActiveProducts]', data?.length ?? 0, 'rows, error:', error?.message ?? null);
   if (error) throw new Error(error.message);
   return data ?? [];
 }
@@ -37,6 +38,7 @@ export async function getCategories(): Promise<Category[]> {
     .select("id, name, color")
     .order("name");
 
+  console.log('[getCategories]', data?.length ?? 0, 'rows, error:', error?.message ?? null);
   if (error) throw new Error(error.message);
   return data ?? [];
 }

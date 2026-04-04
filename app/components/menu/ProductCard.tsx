@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "motion/react";
-import type { Product } from "@/lib/types";
+import type { ProductGroup } from "@/lib/types";
 import { useCart } from "./CartProvider";
 
 export const productCardVariants = {
@@ -11,19 +11,30 @@ export const productCardVariants = {
 };
 
 type Props = {
-  product: Product;
+  group: ProductGroup;
   categoryColor: string | null;
-  onSelect: (product: Product) => void;
+  onSelect: (group: ProductGroup) => void;
 };
 
-export function ProductCard({ product, categoryColor, onSelect }: Props) {
+export function ProductCard({ group, categoryColor, onSelect }: Props) {
   const { items } = useCart();
-  const cartItem = items.find((i) => i.productId === product.id);
-  const qty = cartItem?.quantity ?? 0;
+  const qty = group.variants.reduce(
+    (sum, v) => sum + (items.find((i) => i.productId === v.product.id)?.quantity ?? 0),
+    0
+  );
+
+  const prices = group.variants.map((v) => v.product.price);
+  const minPrice = Math.min(...prices);
+  const allSamePrice = prices.every((p) => p === minPrice);
+  const priceLabel = allSamePrice
+    ? `₺${minPrice.toLocaleString("tr-TR")}`
+    : `₺${minPrice.toLocaleString("tr-TR")}+`;
+
+  const hasVariants = group.variants.length > 1;
 
   return (
     <motion.button
-      onClick={() => onSelect(product)}
+      onClick={() => onSelect(group)}
       className="bg-card rounded-card flex gap-3 p-3 shadow-sm text-left w-full relative"
       variants={productCardVariants}
       whileTap={{ scale: 0.97 }}
@@ -33,10 +44,10 @@ export function ProductCard({ product, categoryColor, onSelect }: Props) {
         className="flex-shrink-0 w-24 h-24 rounded-sm overflow-hidden relative"
         style={{ backgroundColor: categoryColor ?? "#e5e7eb" }}
       >
-        {product.image_url ? (
+        {group.image_url ? (
           <Image
-            src={product.image_url}
-            alt={product.name}
+            src={group.image_url}
+            alt={group.baseName}
             width={96}
             height={96}
             className="w-full h-full object-cover"
@@ -58,15 +69,15 @@ export function ProductCard({ product, categoryColor, onSelect }: Props) {
         <div>
           <div className="flex items-start justify-between gap-1">
             <h3 className="font-bold text-text text-sm leading-snug">
-              {product.name}
+              {group.baseName}
             </h3>
             <span className="font-bold text-brand text-sm whitespace-nowrap ml-1">
-              ₺{product.price.toLocaleString("tr-TR")}
+              {priceLabel}
             </span>
           </div>
-          {cartItem?.notes && (
-            <p className="text-xs text-muted mt-1 truncate italic">
-              "{cartItem.notes}"
+          {hasVariants && (
+            <p className="text-xs text-muted mt-1">
+              {group.variants.map((v) => v.sizeLabel).join(' · ')}
             </p>
           )}
         </div>

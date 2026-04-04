@@ -18,6 +18,18 @@ export type Table = {
   status: string;
 };
 
+export type ProductVariant = {
+  product: Product;
+  sizeLabel: string;
+};
+
+export type ProductGroup = {
+  baseName: string;
+  image_url: string | null;
+  category_id: number | null;
+  variants: ProductVariant[];
+};
+
 export type CartItem = {
   productId: number;
   productName: string;

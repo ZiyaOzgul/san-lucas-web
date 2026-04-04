@@ -3,27 +3,32 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import type { Product } from "@/lib/types";
+import type { ProductGroup } from "@/lib/types";
 import { useCart } from "./CartProvider";
 
 type Props = {
-  product: Product;
+  group: ProductGroup;
   categoryColor: string | null;
   onClose: () => void;
 };
 
-export function ProductModal({ product, categoryColor, onClose }: Props) {
+export function ProductModal({ group, categoryColor, onClose }: Props) {
   const { addItem } = useCart();
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
+    setSelectedVariantIdx(0);
     setQuantity(1);
     setNotes("");
-  }, [product.id]);
+  }, [group.baseName, group.category_id]);
+
+  const selectedVariant = group.variants[selectedVariantIdx];
+  const hasVariants = group.variants.length > 1;
 
   function handleAdd() {
-    addItem(product, quantity, notes.trim() || undefined);
+    addItem(selectedVariant.product, quantity, notes.trim() || undefined);
     onClose();
   }
 
@@ -69,10 +74,10 @@ export function ProductModal({ product, categoryColor, onClose }: Props) {
           className="mx-4 mt-2 rounded-2xl overflow-hidden h-52"
           style={{ backgroundColor: categoryColor ?? "#e5e7eb" }}
         >
-          {product.image_url ? (
+          {group.image_url ? (
             <Image
-              src={product.image_url}
-              alt={product.name}
+              src={group.image_url}
+              alt={group.baseName}
               width={400}
               height={208}
               className="w-full h-full object-cover"
@@ -94,12 +99,37 @@ export function ProductModal({ product, categoryColor, onClose }: Props) {
           {/* Name + price */}
           <div className="flex items-start justify-between gap-2 mb-4">
             <h2 className="text-lg font-bold text-text leading-snug flex-1">
-              {product.name}
+              {group.baseName}
             </h2>
             <span className="text-xl font-bold text-brand whitespace-nowrap">
-              ₺{product.price.toLocaleString("tr-TR")}
+              ₺{selectedVariant.product.price.toLocaleString("tr-TR")}
             </span>
           </div>
+
+          {/* Size selector */}
+          {hasVariants && (
+            <div className="mb-5">
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+                Boyut
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {group.variants.map((variant, idx) => (
+                  <motion.button
+                    key={variant.product.id}
+                    onClick={() => setSelectedVariantIdx(idx)}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-4 py-2 rounded-pill text-sm font-semibold border transition-colors ${
+                      idx === selectedVariantIdx
+                        ? "bg-brand text-white border-brand"
+                        : "border-brand text-brand bg-white"
+                    }`}
+                  >
+                    {variant.sizeLabel} · ₺{variant.product.price.toLocaleString("tr-TR")}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Notes */}
           <div className="mb-5">
@@ -147,7 +177,7 @@ export function ProductModal({ product, categoryColor, onClose }: Props) {
               className="flex-1 bg-brand text-white font-semibold rounded-pill py-3 text-sm shadow-sm"
               whileTap={{ scale: 0.97 }}
             >
-              Sepete Ekle · ₺{(product.price * quantity).toLocaleString("tr-TR")}
+              Sepete Ekle · ₺{(selectedVariant.product.price * quantity).toLocaleString("tr-TR")}
             </motion.button>
           </div>
         </div>
