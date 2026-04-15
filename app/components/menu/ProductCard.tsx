@@ -19,7 +19,7 @@ type Props = {
 export function ProductCard({ group, categoryColor, onSelect }: Props) {
   const { items } = useCart();
   const qty = group.variants.reduce(
-    (sum, v) => sum + (items.find((i) => i.productId === v.product.id)?.quantity ?? 0),
+    (sum, v) => sum + (items.find((i) => i.productId === v.product.id && i.variantId === v.variantId)?.quantity ?? 0),
     0
   );
 

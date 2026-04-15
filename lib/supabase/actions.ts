@@ -44,6 +44,7 @@ export async function createOrder(
     local_id: crypto.randomUUID(),
     order_id: order.id,
     product_id: item.productId,
+    variant_id: item.variantId ?? null,
     quantity: item.quantity,
     unit_price: item.unitPrice,
     is_synced: false,

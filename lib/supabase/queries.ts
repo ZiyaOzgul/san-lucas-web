@@ -18,7 +18,7 @@ export async function getActiveProducts(): Promise<Product[]> {
   const supabase = makeClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, price, category_id, image_url")
+    .select("id, name, price, category_id, image_url, product_variants(id, name, price)")
     .eq("is_active", true)
     .order("name");
 

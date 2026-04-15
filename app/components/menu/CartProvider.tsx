@@ -11,8 +11,8 @@ import type { CartItem, Product, OrderType } from "@/lib/types";
 
 type CartContextValue = {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number, notes?: string) => void;
-  removeItem: (productId: number) => void;
+  addItem: (product: Product, quantity?: number, notes?: string, variantId?: number | null, variantName?: string | null) => void;
+  removeItem: (productId: number, variantId?: number | null) => void;
   clearCart: () => void;
   itemCount: number;
   total: number;
@@ -38,12 +38,14 @@ export function CartProvider({ children, tableId, orderType }: Props) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const addItem = useCallback(
-    (product: Product, quantity: number = 1, notes?: string) => {
+    (product: Product, quantity: number = 1, notes?: string, variantId: number | null = null, variantName: string | null = null) => {
       setItems((prev) => {
-        const existing = prev.find((i) => i.productId === product.id);
+        const existing = prev.find(
+          (i) => i.productId === product.id && i.variantId === variantId
+        );
         if (existing) {
           return prev.map((i) =>
-            i.productId === product.id
+            i.productId === product.id && i.variantId === variantId
               ? { ...i, quantity: i.quantity + quantity, notes: notes ?? i.notes }
               : i
           );
@@ -53,6 +55,8 @@ export function CartProvider({ children, tableId, orderType }: Props) {
           {
             productId: product.id,
             productName: product.name,
+            variantId,
+            variantName,
             quantity,
             unitPrice: product.price,
             notes,
@@ -63,15 +67,21 @@ export function CartProvider({ children, tableId, orderType }: Props) {
     []
   );
 
-  const removeItem = useCallback((productId: number) => {
+  const removeItem = useCallback((productId: number, variantId: number | null = null) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.productId === productId);
+      const existing = prev.find(
+        (i) => i.productId === productId && i.variantId === variantId
+      );
       if (!existing) return prev;
       if (existing.quantity === 1) {
-        return prev.filter((i) => i.productId !== productId);
+        return prev.filter(
+          (i) => !(i.productId === productId && i.variantId === variantId)
+        );
       }
       return prev.map((i) =>
-        i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i
+        i.productId === productId && i.variantId === variantId
+          ? { ...i, quantity: i.quantity - 1 }
+          : i
       );
     });
   }, []);

@@ -22,39 +22,28 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
 
-const SIZE_REGEX = /^(.+?)[\s\-–]+(büyük|buyuk|large|orta|medium|küçük|kucuk|small)$/i;
-const LMS_REGEX = /^(.+?)\s*[-–]\s*(l|m|s)$/i;
-const SIZE_MAP: Record<string, string> = {
-  büyük: 'Büyük', buyuk: 'Büyük', large: 'Büyük',
-  orta: 'Orta', medium: 'Orta',
-  küçük: 'Küçük', kucuk: 'Küçük', small: 'Küçük',
-  l: 'Büyük', m: 'Orta', s: 'Küçük',
-};
-
-function parseVariant(name: string): { baseName: string; sizeLabel: string | null } {
-  let match = name.match(SIZE_REGEX);
-  if (match) {
-    return { baseName: match[1].trim(), sizeLabel: SIZE_MAP[match[2].toLowerCase()] ?? match[2] };
-  }
-  match = name.match(LMS_REGEX);
-  if (match) {
-    return { baseName: match[1].trim(), sizeLabel: SIZE_MAP[match[2].toLowerCase()] ?? match[2] };
-  }
-  return { baseName: name, sizeLabel: null };
-}
-
 function groupProducts(products: Product[]): ProductGroup[] {
-  const map = new Map<string, ProductGroup>();
-  for (const product of products) {
-    const { baseName, sizeLabel } = parseVariant(product.name);
-    // Key by baseName only — variants of the same product may have different category_ids
-    const key = baseName;
-    if (!map.has(key)) {
-      map.set(key, { baseName, image_url: product.image_url, category_id: product.category_id, variants: [] });
+  return products.map(product => {
+    const variants = product.product_variants ?? [];
+    if (variants.length > 0) {
+      return {
+        baseName: product.name,
+        image_url: product.image_url,
+        category_id: product.category_id,
+        variants: variants.map(v => ({
+          product: { ...product, price: v.price },
+          sizeLabel: v.name,
+          variantId: v.id,
+        })),
+      };
     }
-    map.get(key)!.variants.push({ product, sizeLabel: sizeLabel ?? 'Standart' });
-  }
-  return Array.from(map.values());
+    return {
+      baseName: product.name,
+      image_url: product.image_url,
+      category_id: product.category_id,
+      variants: [{ product, sizeLabel: 'Standart', variantId: null }],
+    };
+  });
 }
 
 export function ProductCatalog({ products, categories }: Props) {

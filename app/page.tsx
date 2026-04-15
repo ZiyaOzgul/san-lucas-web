@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { LandingPage } from "@/app/components/LandingPage";
 
 export default function Home() {
-  redirect("/menu?table=1");
+  return <LandingPage />;
 }

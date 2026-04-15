@@ -4,12 +4,19 @@ export type Category = {
   color: string | null;
 };
 
+export type DbVariant = {
+  id: number;
+  name: string;
+  price: number;
+};
+
 export type Product = {
   id: number;
   name: string;
   price: number;
   category_id: number | null;
   image_url: string | null;
+  product_variants: DbVariant[];
 };
 
 export type Table = {
@@ -21,6 +28,7 @@ export type Table = {
 export type ProductVariant = {
   product: Product;
   sizeLabel: string;
+  variantId: number | null;
 };
 
 export type ProductGroup = {
@@ -33,6 +41,8 @@ export type ProductGroup = {
 export type CartItem = {
   productId: number;
   productName: string;
+  variantId: number | null;
+  variantName: string | null;
   quantity: number;
   unitPrice: number;
   notes?: string;

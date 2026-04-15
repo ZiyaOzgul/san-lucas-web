@@ -28,7 +28,7 @@ export function ProductModal({ group, categoryColor, onClose }: Props) {
   const hasVariants = group.variants.length > 1;
 
   function handleAdd() {
-    addItem(selectedVariant.product, quantity, notes.trim() || undefined);
+    addItem(selectedVariant.product, quantity, notes.trim() || undefined, selectedVariant.variantId ?? null, selectedVariant.sizeLabel);
     onClose();
   }
 
@@ -115,7 +115,7 @@ export function ProductModal({ group, categoryColor, onClose }: Props) {
               <div className="flex flex-wrap gap-2">
                 {group.variants.map((variant, idx) => (
                   <motion.button
-                    key={variant.product.id}
+                    key={variant.variantId ?? idx}
                     onClick={() => setSelectedVariantIdx(idx)}
                     whileTap={{ scale: 0.95 }}
                     className={`px-4 py-2 rounded-pill text-sm font-semibold border transition-colors ${
