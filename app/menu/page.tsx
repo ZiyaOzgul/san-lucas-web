@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { getActiveProducts, getCategories, getTable } from "@/lib/supabase/queries";
 import { CartProvider } from "@/app/components/menu/CartProvider";
 import { MenuHeader } from "@/app/components/menu/MenuHeader";
@@ -9,7 +10,7 @@ import { SplashScreen } from "@/app/components/menu/SplashScreen";
 import MenuLoading from "./loading";
 
 export default function MenuPage(props: {
-  searchParams: Promise<{ table?: string }>;
+  searchParams: Promise<{ table?: string; from?: string }>;
 }) {
   return (
     <Suspense fallback={<MenuLoading />}>
@@ -21,9 +22,14 @@ export default function MenuPage(props: {
 async function MenuContent({
   searchParamsPromise,
 }: {
-  searchParamsPromise: Promise<{ table?: string }>;
+  searchParamsPromise: Promise<{ table?: string; from?: string }>;
 }) {
-  const { table } = await searchParamsPromise;
+  const { table, from } = await searchParamsPromise;
+
+  // Redirect to landing page first unless coming from it
+  if (from !== "landing") {
+    redirect(table ? `/?table=${table}` : "/");
+  }
 
   const tableNum = table ? parseInt(table, 10) : NaN;
   if (isNaN(tableNum) || tableNum < 1 || tableNum > 20) {
