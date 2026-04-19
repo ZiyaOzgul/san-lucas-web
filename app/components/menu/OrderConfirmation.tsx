@@ -52,12 +52,12 @@ export function OrderConfirmation({ orderId, tableId, tableLabel, onNewOrder }: 
 
       {/* Status hint */}
       <motion.div
-        className="w-full max-w-xs bg-amber-50 border border-amber-200 rounded-2xl px-4 py-4 flex flex-col items-center gap-3"
+        className="w-full max-w-xs bg-surface border border-brand/40 rounded-2xl px-4 py-4 flex flex-col items-center gap-3"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <p className="text-sm text-amber-800 font-medium leading-snug">
+        <p className="text-sm text-white/80 font-medium leading-snug">
           Siparişinin durumunu takip etmek için sağ üstteki
           {" "}
           <span className="inline-flex items-center bg-brand text-white text-xs font-bold px-2 py-0.5 rounded-pill align-middle">

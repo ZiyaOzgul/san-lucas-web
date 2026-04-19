@@ -13,30 +13,12 @@ const fadeUp = (delay: number) => ({
 const socials = [
   {
     label: "Instagram",
-    href: "https://instagram.com/sanlucascafe",
+    href: "https://instagram.com/sanlucascoffee",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
         <circle cx="12" cy="12" r="4" />
         <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
-      </svg>
-    ),
-  },
-  {
-    label: "TikTok",
-    href: "https://tiktok.com/@sanlucascafe",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z" />
-      </svg>
-    ),
-  },
-  {
-    label: "Facebook",
-    href: "https://facebook.com/sanlucascafe",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
       </svg>
     ),
   },
@@ -49,6 +31,15 @@ const socials = [
       </svg>
     ),
   },
+  {
+    label: "Telefon",
+    href: "tel:+905001234567",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+      </svg>
+    ),
+  },
 ];
 
 export function LandingPage({ tableId }: { tableId?: string }) {
@@ -56,7 +47,7 @@ export function LandingPage({ tableId }: { tableId?: string }) {
     ? `/menu?table=${tableId}&from=landing`
     : "/menu?table=1&from=landing";
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center px-8 overflow-hidden bg-[url('/bgImage.jpeg')] bg-cover bg-center">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-8 overflow-hidden bg-[url('/background.png')] bg-cover bg-center">
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/60" />
 
@@ -67,8 +58,8 @@ export function LandingPage({ tableId }: { tableId?: string }) {
           <Image
             src="/san-lucas-logo.png"
             alt="San Lucas"
-            width={96}
-            height={96}
+            width={300}
+            height={200}
             priority
             className="object-contain"
           />

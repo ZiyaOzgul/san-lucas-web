@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-epilogue);
+  --font-body: var(--font-inter);
 
-  /* San Lucas brand colors */
-  --color-brand:       #1c3829;
-  --color-brand-hover: #162d21;
-  --color-brand-light: #a8c8b0;
-  --color-cream:       #f5f0e6;
-  --color-card:        #ffffff;
-  --color-text:        #1a1a1a;
-  --color-muted:       #6b7280;
-  --color-border:      #e5e7eb;
+  /* San Lucas — Blue & Cream palette */
+  --color-brand:       #D4AF37;  /* Gold — primary accent, CTAs, prices */
+  --color-brand-hover: #B8962E;  /* Darker gold — hover states */
+  --color-brand-light: #F5F5DC;  /* Cream — used as light bg on brand surfaces */
+  --color-cream:       #0A192F;  /* Navy Blue — main app background */
+  --color-card:        #F5F5DC;  /* Cream — product cards, modals, header */
+  --color-surface:     #1E293B;  /* Slate Blue — borders, dividers, overlays */
+  --color-text:        #1A1A2E;  /* Dark navy — text on cream cards */
+  --color-muted:       #5C6B80;  /* Muted — secondary text on cream */
+  --color-border:      #D4C9A8;  /* Warm cream border — inputs, dividers on cream */
 
   /* Border radius */
   --radius-pill: 9999px;
@@ -21,7 +22,6 @@
 }
 
 body {
-  background-color: var(--color-cream);
   color: var(--color-text);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), var(--font-sans), Arial, Helvetica, sans-serif;
 }
