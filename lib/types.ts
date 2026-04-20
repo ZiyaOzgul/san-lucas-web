@@ -2,6 +2,7 @@ export type Category = {
   id: number;
   name: string;
   color: string | null;
+  image_url?: string | null;
 };
 
 export type DbVariant = {

@@ -35,7 +35,7 @@ export async function getCategories(): Promise<Category[]> {
   const supabase = makeClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name, color")
+    .select("id, name, color, image_url")
     .order("name");
 
   console.log('[getCategories]', data?.length ?? 0, 'rows, error:', error?.message ?? null);

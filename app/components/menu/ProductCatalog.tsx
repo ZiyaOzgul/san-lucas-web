@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Category, Product, ProductGroup } from "@/lib/types";
-import { CategoryPills } from "./CategoryPills";
 import { ProductCard } from "./ProductCard";
 import { ProductModal } from "./ProductModal";
 
@@ -47,16 +46,10 @@ function groupProducts(products: Product[]): ProductGroup[] {
 }
 
 export function ProductCatalog({ products, categories }: Props) {
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGroup, setSelectedGroup] = useState<ProductGroup | null>(null);
 
-  useEffect(() => {
-    console.log('[ProductCatalog] categories:', categories.map(c => ({ id: c.id, name: c.name })));
-    console.log('[ProductCatalog] products:', products.map(p => ({ id: p.id, name: p.name, category_id: p.category_id })));
-  }, []);
-
-  // Normalize category_id to number — Supabase returns it as string when column is TEXT
+  // Normalize category_id to number
   const normalizedProducts = products.map((p) => ({
     ...p,
     category_id: p.category_id !== null ? Number(p.category_id) : null,
@@ -65,17 +58,11 @@ export function ProductCatalog({ products, categories }: Props) {
   const categoryMap = new Map(categories.map((c) => [c.id, c]));
   const knownCategoryIds = new Set(categories.map((c) => c.id));
 
-  const filtered = normalizedProducts.filter((p) => {
-    const matchesCat =
-      selectedCategory === null || p.category_id === selectedCategory;
-    const matchesSearch =
-      searchQuery === "" ||
-      p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCat && matchesSearch;
-  });
+  const filtered = normalizedProducts.filter((p) =>
+    searchQuery === "" || p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const groupedCategories = categories
-    .filter((cat) => selectedCategory === null || cat.id === selectedCategory)
     .map((cat) => ({
       category: cat,
       groups: groupProducts(filtered.filter((p) => p.category_id === cat.id)),
@@ -91,20 +78,20 @@ export function ProductCatalog({ products, categories }: Props) {
     ? (categoryMap.get(selectedGroup.category_id)?.color ?? null)
     : null;
 
+  const scrollToCategory = (catId: number) => {
+    document.getElementById(`cat-${catId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* Search */}
       <div className="px-4">
         <div className="flex items-center gap-2 bg-white/70 border border-border rounded-pill px-4 py-2.5">
           <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round"
             className="text-muted flex-shrink-0"
           >
             <circle cx="11" cy="11" r="8" />
@@ -120,16 +107,41 @@ export function ProductCatalog({ products, categories }: Props) {
         </div>
       </div>
 
-      {/* Category pills */}
-      <CategoryPills
-        categories={categories}
-        selected={selectedCategory}
-        onChange={setSelectedCategory}
-      />
+      {/* Category grid */}
+      <motion.div
+        variants={listVariants}
+        initial="hidden"
+        animate="visible"
+        className="px-4 grid grid-cols-2 gap-3"
+      >
+        {categories.map((cat) => (
+          <motion.button
+            key={cat.id}
+            variants={itemVariants}
+            onClick={() => scrollToCategory(cat.id)}
+            className="relative aspect-square rounded-card overflow-hidden"
+            style={
+              cat.image_url
+                ? {
+                    backgroundImage: `url(${cat.image_url})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
+                : { backgroundColor: cat.color ?? "#e8975a" }
+            }
+          >
+            <div className="absolute inset-x-0 bottom-0 px-3 py-2 bg-gradient-to-t from-black/70 to-transparent">
+              <span className="text-white text-sm font-bold leading-tight line-clamp-2">
+                {cat.name}
+              </span>
+            </div>
+          </motion.button>
+        ))}
+      </motion.div>
 
       {/* Grouped product list */}
       <motion.div
-        key={selectedCategory ?? "all"}
+        key="product-list"
         variants={listVariants}
         initial="hidden"
         animate="visible"
@@ -142,7 +154,12 @@ export function ProductCatalog({ products, categories }: Props) {
         ) : (
           <>
             {groupedCategories.map(({ category, groups }) => (
-              <motion.div key={category.id} variants={itemVariants} className="flex flex-col gap-3">
+              <motion.div
+                key={category.id}
+                id={`cat-${category.id}`}
+                variants={itemVariants}
+                className="flex flex-col gap-3 scroll-mt-4"
+              >
                 <div className="flex items-center gap-2">
                   <span
                     className="w-3 h-3 rounded-full flex-shrink-0"
@@ -165,7 +182,7 @@ export function ProductCatalog({ products, categories }: Props) {
             ))}
 
             {uncategorizedGroups.length > 0 && (
-              <motion.div variants={itemVariants} className="flex flex-col gap-3">
+              <motion.div variants={itemVariants} className="flex flex-col gap-3 scroll-mt-4">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full flex-shrink-0 bg-brand" />
                   <h2 className="text-white font-bold text-base tracking-wide">Diğer</h2>
