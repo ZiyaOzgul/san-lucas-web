@@ -1,16 +1,29 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { motion } from "motion/react";
+import { AuthModal } from "@/app/components/auth/AuthModal";
 
 type Props = {
   orderId: number;
   tableId: number;
   tableLabel: string;
+  earnedPoints: number;
+  wasLoggedIn: boolean;
   onNewOrder: () => void;
 };
 
-export function OrderConfirmation({ orderId, tableId, tableLabel, onNewOrder }: Props) {
+export function OrderConfirmation({
+  orderId,
+  tableId,
+  tableLabel,
+  earnedPoints,
+  wasLoggedIn,
+  onNewOrder,
+}: Props) {
+  const [authOpen, setAuthOpen] = useState(false);
+
   return (
     <motion.div
       className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-6"
@@ -38,17 +51,57 @@ export function OrderConfirmation({ orderId, tableId, tableLabel, onNewOrder }: 
       </motion.div>
 
       <motion.div
+        className="w-full max-w-xs bg-card border border-border rounded-card px-5 py-4 shadow-sm text-center"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
       >
         <h2 className="text-2xl font-bold text-text">Sipariş Alındı!</h2>
-        <p className="text-muted mt-2 text-sm">
+        <p className="text-muted mt-2 text-sm leading-relaxed">
           {tableLabel} için #{orderId} numaralı siparişiniz alındı.
           <br />
           En kısa sürede getiriyoruz.
         </p>
       </motion.div>
+
+      {earnedPoints > 0 && (
+        <motion.div
+          className="w-full max-w-xs bg-brand/10 border border-brand/40 rounded-2xl px-4 py-3.5 flex items-center gap-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m12 3 1.9 5.9H20l-5.05 3.66L17 18.5 12 14.84 7 18.5l1.9-5.95L4 8.9h6.1Z" />
+            </svg>
+          </div>
+          <div className="flex-1 text-left">
+            {wasLoggedIn ? (
+              <>
+                <p className="text-sm font-bold text-text">
+                  +{earnedPoints} San Lucas Puanı
+                </p>
+                <p className="text-[11px] text-muted leading-snug mt-0.5">
+                  Sipariş tamamlanınca puanın hesabına eklenecek.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-bold text-text">
+                  {earnedPoints} San Lucas Puanı kaçırdın
+                </p>
+                <button
+                  onClick={() => setAuthOpen(true)}
+                  className="text-[11px] font-bold text-brand mt-0.5 underline underline-offset-2"
+                >
+                  Giriş yapsaydın puanın hesabına eklenecekti — Giriş Yap
+                </button>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* Status hint */}
       <motion.div
@@ -84,6 +137,8 @@ export function OrderConfirmation({ orderId, tableId, tableLabel, onNewOrder }: 
       >
         Tekrar Sipariş Ver
       </motion.button>
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </motion.div>
   );
 }

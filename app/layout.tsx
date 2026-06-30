@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Epilogue, Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/app/contexts/AuthContext";
 
 const epilogue = Epilogue({
   variable: "--font-epilogue",
@@ -28,7 +29,9 @@ export default function RootLayout({
       lang="tr"
       className={`${epilogue.variable} ${inter.variable} h-full`}
     >
-      <body className="min-h-full bg-[url('/background.png')] bg-cover bg-center bg-fixed">{children}</body>
+      <body className="min-h-full bg-[url('/background.png')] bg-cover bg-center bg-fixed">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

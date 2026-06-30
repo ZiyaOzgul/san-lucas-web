@@ -15,12 +15,20 @@ function makeClient() {
 export async function createOrder(
   items: CartItem[],
   tableId: number,
-  orderType: OrderType
+  orderType: OrderType,
+  userId?: string | null
 ): Promise<CreateOrderResult> {
   const supabase = makeClient();
 
+  const modifiersSum = (mods: CartItem["modifiers"]) =>
+    (mods ?? []).reduce(
+      (s, m) => s + (Number(m.priceDelta) || 0) * (Number(m.quantity) || 1),
+      0
+    );
+
   const total = items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
+    (sum, item) =>
+      sum + (item.unitPrice + modifiersSum(item.modifiers)) * item.quantity,
     0
   );
 
@@ -32,6 +40,7 @@ export async function createOrder(
       status: orderType,
       total: Math.round(total * 100) / 100,
       is_synced: false,
+      user_id: userId ?? null,
     })
     .select("id")
     .single();
@@ -50,12 +59,55 @@ export async function createOrder(
     is_synced: false,
   }));
 
-  const { error: itemsError } = await supabase
+  const { data: insertedItems, error: itemsError } = await supabase
     .from("order_items")
-    .insert(orderItems);
+    .insert(orderItems)
+    .select("id, local_id");
 
   if (itemsError) {
     return { success: false, error: itemsError.message };
+  }
+
+  const idByLocalId = new Map<string, number>();
+  for (const row of insertedItems ?? []) {
+    idByLocalId.set(row.local_id as string, Number(row.id));
+  }
+
+  const modifierRows: {
+    local_id: string;
+    order_item_id: number;
+    modifier_id: number | null;
+    name: string;
+    price_delta: number;
+    quantity: number;
+  }[] = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const cartItem = items[i];
+    const mods = cartItem.modifiers ?? [];
+    if (mods.length === 0) continue;
+    const localId = orderItems[i].local_id;
+    const orderItemId = idByLocalId.get(localId);
+    if (!orderItemId) continue;
+    for (const m of mods) {
+      modifierRows.push({
+        local_id: crypto.randomUUID(),
+        order_item_id: orderItemId,
+        modifier_id: m.modifierId,
+        name: m.name,
+        price_delta: Number(m.priceDelta) || 0,
+        quantity: Number(m.quantity) || 1,
+      });
+    }
+  }
+
+  if (modifierRows.length > 0) {
+    const { error: modError } = await supabase
+      .from("order_item_modifiers")
+      .insert(modifierRows);
+    if (modError) {
+      return { success: false, error: modError.message };
+    }
   }
 
   return { success: true, orderId: order.id };

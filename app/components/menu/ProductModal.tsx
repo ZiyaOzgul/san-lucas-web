@@ -1,34 +1,92 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import type { ProductGroup } from "@/lib/types";
+import type { CartItemModifier, Modifier, ProductGroup } from "@/lib/types";
 import { useCart } from "./CartProvider";
 
 type Props = {
   group: ProductGroup;
   categoryColor: string | null;
+  modifiers: Modifier[];
   onClose: () => void;
 };
 
-export function ProductModal({ group, categoryColor, onClose }: Props) {
+export function ProductModal({ group, categoryColor, modifiers, onClose }: Props) {
   const { addItem } = useCart();
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
+  const [modifierQty, setModifierQty] = useState<Map<number, number>>(new Map());
 
   useEffect(() => {
     setSelectedVariantIdx(0);
     setQuantity(1);
     setNotes("");
+    setModifierQty(new Map());
   }, [group.baseName, group.category_id]);
 
   const selectedVariant = group.variants[selectedVariantIdx];
   const hasVariants = group.variants.length > 1;
+  const productId = selectedVariant.product.id;
+  const categoryId = group.category_id;
+
+  const applicableModifiers = useMemo(() => {
+    return modifiers
+      .filter(
+        (m) =>
+          m.product_id === productId ||
+          (categoryId !== null && m.category_id === categoryId)
+      )
+      .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name, "tr"));
+  }, [modifiers, productId, categoryId]);
+
+  function toggleModifier(id: number) {
+    setModifierQty((prev) => {
+      const next = new Map(prev);
+      if (next.has(id)) next.delete(id);
+      else next.set(id, 1);
+      return next;
+    });
+  }
+
+  function bumpModifier(id: number, delta: number) {
+    setModifierQty((prev) => {
+      const next = new Map(prev);
+      const current = next.get(id) ?? 0;
+      const updated = current + delta;
+      if (updated <= 0) next.delete(id);
+      else next.set(id, updated);
+      return next;
+    });
+  }
+
+  const modifiersDelta = applicableModifiers
+    .filter((m) => modifierQty.has(m.id))
+    .reduce(
+      (s, m) => s + (Number(m.price_delta) || 0) * (modifierQty.get(m.id) ?? 1),
+      0
+    );
+  const lineUnit = selectedVariant.product.price + modifiersDelta;
 
   function handleAdd() {
-    addItem(selectedVariant.product, quantity, notes.trim() || undefined, selectedVariant.variantId ?? null, selectedVariant.sizeLabel);
+    const selectedMods: CartItemModifier[] = applicableModifiers
+      .filter((m) => modifierQty.has(m.id))
+      .map((m) => ({
+        modifierId: m.id,
+        name: m.name,
+        priceDelta: Number(m.price_delta) || 0,
+        quantity: modifierQty.get(m.id) ?? 1,
+      }));
+    addItem({
+      product: selectedVariant.product,
+      quantity,
+      notes: notes.trim() || undefined,
+      variantId: selectedVariant.variantId ?? null,
+      variantName: selectedVariant.sizeLabel,
+      modifiers: selectedMods,
+    });
     onClose();
   }
 
@@ -131,6 +189,70 @@ export function ProductModal({ group, categoryColor, onClose }: Props) {
             </div>
           )}
 
+          {/* Modifiers */}
+          {applicableModifiers.length > 0 && (
+            <div className="mb-5">
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wide mb-2">
+                Ekstra
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {applicableModifiers.map((m) => {
+                  const qty = modifierQty.get(m.id) ?? 0;
+                  const selected = qty > 0;
+                  const delta = Number(m.price_delta) || 0;
+                  const deltaTotal = delta * Math.max(qty, 1);
+                  if (!selected) {
+                    return (
+                      <motion.button
+                        key={m.id}
+                        onClick={() => toggleModifier(m.id)}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-3.5 py-2 rounded-pill text-sm font-semibold border border-brand text-brand bg-white transition-colors"
+                      >
+                        + {m.name}
+                        {delta !== 0 && (
+                          <span className="ml-1.5 font-bold">
+                            {delta > 0 ? "+" : "−"}₺{Math.abs(delta).toLocaleString("tr-TR")}
+                          </span>
+                        )}
+                      </motion.button>
+                    );
+                  }
+                  return (
+                    <div
+                      key={m.id}
+                      className="flex items-center gap-1.5 pl-3.5 pr-1.5 py-1 rounded-pill bg-brand text-white text-sm font-semibold border border-brand"
+                    >
+                      <span>+ {m.name}</span>
+                      <motion.button
+                        onClick={() => bumpModifier(m.id, -1)}
+                        whileTap={{ scale: 0.9 }}
+                        className="w-6 h-6 ml-1 rounded-full bg-white/15 flex items-center justify-center text-base leading-none"
+                        aria-label="Azalt"
+                      >
+                        −
+                      </motion.button>
+                      <span className="min-w-[14px] text-center font-bold">{qty}</span>
+                      <motion.button
+                        onClick={() => bumpModifier(m.id, +1)}
+                        whileTap={{ scale: 0.9 }}
+                        className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-base leading-none"
+                        aria-label="Artır"
+                      >
+                        +
+                      </motion.button>
+                      {deltaTotal !== 0 && (
+                        <span className="ml-1 mr-1 font-bold">
+                          {deltaTotal > 0 ? "+" : "−"}₺{Math.abs(deltaTotal).toLocaleString("tr-TR")}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Notes */}
           <div className="mb-5">
             <label className="block text-xs font-semibold text-muted uppercase tracking-wide mb-1.5">
@@ -177,7 +299,7 @@ export function ProductModal({ group, categoryColor, onClose }: Props) {
               className="flex-1 bg-brand text-white font-semibold rounded-pill py-3 text-sm shadow-sm"
               whileTap={{ scale: 0.97 }}
             >
-              Sepete Ekle · ₺{(selectedVariant.product.price * quantity).toLocaleString("tr-TR")}
+              Sepete Ekle · ₺{(lineUnit * quantity).toLocaleString("tr-TR")}
             </motion.button>
           </div>
         </div>

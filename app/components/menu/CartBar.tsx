@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "./CartProvider";
 import { createOrder } from "@/lib/supabase/actions";
 import { OrderConfirmation } from "./OrderConfirmation";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 type Props = {
   tableLabel: string;
@@ -12,8 +13,11 @@ type Props = {
 
 export function CartBar({ tableLabel }: Props) {
   const { items, itemCount, total, clearCart, tableId, orderType } = useCart();
+  const { user } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [confirmedOrderId, setConfirmedOrderId] = useState<number | null>(null);
+  const [confirmedPoints, setConfirmedPoints] = useState(0);
+  const [confirmedWasLoggedIn, setConfirmedWasLoggedIn] = useState(false);
 
   if (confirmedOrderId !== null) {
     return (
@@ -21,6 +25,8 @@ export function CartBar({ tableLabel }: Props) {
         orderId={confirmedOrderId}
         tableId={tableId}
         tableLabel={tableLabel}
+        earnedPoints={confirmedPoints}
+        wasLoggedIn={confirmedWasLoggedIn}
         onNewOrder={() => {
           setConfirmedOrderId(null);
           clearCart();
@@ -30,9 +36,16 @@ export function CartBar({ tableLabel }: Props) {
   }
 
   function handleCheckout() {
+    const earned = items.reduce(
+      (sum, i) => sum + (i.pointsValue ?? 0) * i.quantity,
+      0
+    );
+    const wasLoggedIn = !!user;
     startTransition(async () => {
-      const result = await createOrder(items, tableId, orderType);
+      const result = await createOrder(items, tableId, orderType, user?.id ?? null);
       if (result.success) {
+        setConfirmedPoints(earned);
+        setConfirmedWasLoggedIn(wasLoggedIn);
         setConfirmedOrderId(result.orderId);
       } else {
         alert(`Hata: ${result.error}`);

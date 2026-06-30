@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
-import { getActiveProducts, getCategories, getTable } from "@/lib/supabase/queries";
+import { getActiveModifiers, getActiveProducts, getCategories, getTable } from "@/lib/supabase/queries";
 import { CartProvider } from "@/app/components/menu/CartProvider";
 import { MenuHeader } from "@/app/components/menu/MenuHeader";
 import { ProductCatalog } from "@/app/components/menu/ProductCatalog";
@@ -34,10 +34,11 @@ async function WaiterOrderContent({
   }
 
   const { table } = await searchParamsPromise;
-  const [tableData, categories, products] = await Promise.all([
+  const [tableData, categories, products, modifiers] = await Promise.all([
     getTable(table),
     getCategories(),
     getActiveProducts(),
+    getActiveModifiers(),
   ]);
 
   const tableId = tableData?.id ?? 1;
@@ -76,7 +77,7 @@ async function WaiterOrderContent({
         </div>
 
         <div className="mt-3">
-          <ProductCatalog products={products} categories={categories} />
+          <ProductCatalog products={products} categories={categories} modifiers={modifiers} />
         </div>
         <CartBar tableLabel={tableLabel} />
       </div>

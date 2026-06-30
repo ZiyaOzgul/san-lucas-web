@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { motion } from "motion/react";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { AuthModal } from "@/app/components/auth/AuthModal";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20 },
@@ -46,6 +49,14 @@ export function LandingPage({ tableId }: { tableId?: string }) {
   const menuHref = tableId
     ? `/menu?table=${tableId}&from=landing`
     : "/menu?table=1&from=landing";
+  const { user, profile, loading } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
+  const initial = (profile?.full_name || user?.email || "?")
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+  const points = profile?.loyalty_points ?? 0;
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center px-8 overflow-hidden bg-[url('/background.png')] bg-cover bg-center">
       {/* Dark overlay */}
@@ -82,6 +93,36 @@ export function LandingPage({ tableId }: { tableId?: string }) {
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.28 }}
           className="w-12 h-0.5 bg-brand-light mt-4 mb-8"
         />
+
+        {/* Auth pill — above CTA */}
+        <motion.div {...fadeUp(0.32)} className="mb-3">
+          {!loading && user ? (
+            <Link
+              href="/profile"
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/25 rounded-pill pl-1.5 pr-3.5 py-1.5 text-white"
+            >
+              <span className="w-7 h-7 rounded-full bg-brand text-white text-xs font-bold flex items-center justify-center">
+                {initial}
+              </span>
+              <span className="text-[11px] font-bold tracking-wider">
+                {points} PUAN
+              </span>
+            </Link>
+          ) : (
+            <button
+              onClick={() => setAuthOpen(true)}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/25 text-white text-xs font-bold px-4 py-2 rounded-pill active:scale-95 transition-transform disabled:opacity-60"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+              Giriş Yap · Puan Kazan
+            </button>
+          )}
+        </motion.div>
 
         {/* CTA button */}
         <motion.div {...fadeUp(0.38)}>
@@ -126,6 +167,8 @@ export function LandingPage({ tableId }: { tableId?: string }) {
           ))}
         </motion.div>
       </div>
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { getActiveProducts, getCategories, getTable } from "@/lib/supabase/queries";
+import { getActiveModifiers, getActiveProducts, getCategories, getTable } from "@/lib/supabase/queries";
 import { CartProvider } from "@/app/components/menu/CartProvider";
 import { MenuHeader } from "@/app/components/menu/MenuHeader";
 import { MenuHero } from "@/app/components/menu/MenuHero";
@@ -45,10 +45,11 @@ async function MenuContent({
     );
   }
 
-  const [tableData, categories, products] = await Promise.all([
+  const [tableData, categories, products, modifiers] = await Promise.all([
     getTable(table),
     getCategories(),
     getActiveProducts(),
+    getActiveModifiers(),
   ]);
 
   const tableId = tableNum;
@@ -67,7 +68,7 @@ async function MenuContent({
           subtitle="Lezzetli içecekler ve atıştırmalıklar sizi bekliyor."
         />
         <div className="mt-4">
-          <ProductCatalog products={products} categories={categories} />
+          <ProductCatalog products={products} categories={categories} modifiers={modifiers} />
         </div>
         <CartBar tableLabel={tableLabel} />
       </div>

@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { Category, Product, ProductGroup } from "@/lib/types";
+import type { Category, Modifier, Product, ProductGroup } from "@/lib/types";
 import { ProductCard } from "./ProductCard";
 import { ProductModal } from "./ProductModal";
 
 type Props = {
   products: Product[];
   categories: Category[];
+  modifiers: Modifier[];
 };
 
 const listVariants = {
@@ -45,7 +46,7 @@ function groupProducts(products: Product[]): ProductGroup[] {
   });
 }
 
-export function ProductCatalog({ products, categories }: Props) {
+export function ProductCatalog({ products, categories, modifiers }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGroup, setSelectedGroup] = useState<ProductGroup | null>(null);
 
@@ -208,6 +209,7 @@ export function ProductCatalog({ products, categories }: Props) {
             key={selectedGroup.baseName}
             group={selectedGroup}
             categoryColor={selectedCategoryColor}
+            modifiers={modifiers}
             onClose={() => setSelectedGroup(null)}
           />
         )}
